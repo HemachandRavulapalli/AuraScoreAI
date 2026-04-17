@@ -1,0 +1,5 @@
+{
+  "name": "AuraScore AI",
+  "description": "A production-ready web application UI for checking X scores, empowered by Gemini AI.",
+  "requestFramePermissions": []
+}

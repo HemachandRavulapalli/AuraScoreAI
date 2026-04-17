@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  # The primary backend API and frontend static server
+  aurascore-app:
+    # Build directly from the Dockerfile in this directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Exposing the internal Express node port 3000 to the host network
+    ports:
+      - "3000:3000"
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+    # If a .env file exists locally, Docker Compose will automatically inject
+    # securely without hardcoding API keys in source control.
+    env_file:
+      - .env
+    # A crucial restart policy for production servers prioritizing uptime
+    restart: unless-stopped

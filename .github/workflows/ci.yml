@@ -1,0 +1,42 @@
+name: AuraScore CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "mainline" ]
+  pull_request:
+    branches: [ "main", "mainline" ]
+
+jobs:
+  build_and_test:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+    # 1. Check out the latest code
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # 2. Setup a deterministic Node.js container
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    # 3. Clean Install dependencies strictly adhering to package-lock.json
+    - name: Clean Install Dependencies
+      run: npm ci
+
+    # 4. Strict TypeScript checking. Ensures no type-safety regressions
+    #    make it into the build pipeline undetected.
+    - name: Type Checking (Lint)
+      run: npm run lint
+
+    # 5. Production Compile. Verifies that Vite can bundle the app cleanly
+    #    without throwing any obscure rollup or transpilation errors.
+    - name: Verify Production Build
+      run: npm run build

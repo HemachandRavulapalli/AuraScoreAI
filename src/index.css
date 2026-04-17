@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Text:wght@100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0F172A;
+  --color-off-white: #F8FAFC;
+  --color-red: #06B6D4;
+  --font-sans: "Big Shoulders Text", ui-sans-serif, system-ui, sans-serif;
+  --font-condensed: "Big Shoulders Text", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-off-white font-sans;
+  }
+}
+
+.card-shape {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjY3IiBoZWlnaHQ9IjEzMiIgdmlld0JveD0iMCAwIDI2NyAxMzIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0yNjcgMTA3QzI2NyAxMjAuODA3IDI1NS44MDcgMTMyIDI0MiAxMzJIMTA1QzkxLjE5MjkgMTMyIDgwLjM4NzggMTIwLjUzNyA3Ni4xNDU3IDEwNy4zOTdDNjguMjY5OCA4My4wMDMxIDQ4Ljk5NjkgNjMuNzMwMiAyNC42MDI2IDU1Ljg1NDNDMTEuNDYzMyA1MS42MTIyIDAgNDAuODA3MSAwIDI3VjI1QzAgMTEuMTkyOSAxMS4xOTI5IDAgMjUgMEgyNDJDMjU1LjgwNyAwIDI2NyAxMS4xOTI5IDI2NyAyNVYxMDdaIiBmaWxsPSIjMDZCNkQ0Ii8+Cjwvc3ZnPgo=');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+@keyframes spin-pause {
+  0%, 70% { transform: rotate(0deg); }
+  85% { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-pause {
+  animation: spin-pause 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes typing {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}
+
+.animate-dots::after {
+  content: "";
+  animation: typing 1.5s steps(1) infinite;
+}
