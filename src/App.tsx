@@ -114,9 +114,12 @@ const Bar: FC<{ width: string; label: string; index: number }> = ({ width, label
   );
 };
 
-const SearchScreen: FC<{ onSearch: (username: string) => void; error: string | null }> = ({ onSearch, error }) => {
-  const [username, setUsername] = useState("");
-
+const SearchScreen: FC<{ 
+  onSearch: (username: string) => void; 
+  error: string | null;
+  username: string;
+  setUsername: (val: string) => void;
+}> = ({ onSearch, error, username, setUsername }) => {
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
     if (username.trim()) {
@@ -393,6 +396,7 @@ const ResultScreen: FC<{
 
 export default function App() {
   const [screen, setScreen] = useState<"search" | "loading" | "result">("search");
+  const [typedUsername, setTypedUsername] = useState("");
   const [analysisData, setAnalysisData] = useState<TwitterScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [trends, setTrends] = useState<{
@@ -475,11 +479,16 @@ export default function App() {
     }
   };
 
-  // Calculate a unique hue rotation based on the username string
+  // Calculate a unique hue rotation based on the high-entropy string hash
   const getHueRotation = () => {
-    if (!analysisData?.username || screen !== "result") return 0; // Default to Cyan
-    const hash = Array.from(analysisData.username).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return hash % 360;
+    const targetString = screen === "result" ? (analysisData?.username || "") : typedUsername;
+    if (!targetString) return 0; // Default to Cyan if completely empty
+    
+    let hash = 0;
+    for (let i = 0; i < targetString.length; i++) {
+        hash = targetString.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash % 360);
   };
 
   const hueRotation = getHueRotation();
@@ -507,6 +516,8 @@ export default function App() {
               key="search" 
               onSearch={handleSearch} 
               error={error}
+              username={typedUsername}
+              setUsername={setTypedUsername}
             />
           )}
           {screen === "loading" && (
