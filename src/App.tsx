@@ -192,6 +192,9 @@ const LoadingScreen: FC = () => (
   </motion.div>
 );
 
+import { toPng } from 'html-to-image';
+import { Download } from 'lucide-react';
+
 const ResultScreen: FC<{ 
   data: TwitterScoreResult | null;
   trends: {
@@ -199,7 +202,11 @@ const ResultScreen: FC<{
     comments: 'up' | 'down' | 'neutral';
     rate: 'up' | 'down' | 'neutral';
   } | null;
-}> = ({ data, trends }) => {
+  hueRotation: number;
+}> = ({ data, trends, hueRotation }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
   if (!data) return null;
 
   const getTrendIcon = (type: 'up' | 'down' | 'neutral', size: number = 28) => {
@@ -212,13 +219,37 @@ const ResultScreen: FC<{
     return `${rate.toFixed(2)}%`;
   };
 
+  const handleDownload = async () => {
+    if (!cardRef.current || isDownloading) return;
+    try {
+      setIsDownloading(true);
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        backgroundColor: '#0F172A',
+        style: { filter: `hue-rotate(${hueRotation}deg)` },
+        filter: (node) => {
+          // exclude the download button from the generated image
+          return !node.classList?.contains('exclude-from-capture');
+        }
+      });
+      const link = document.createElement('a');
+      link.download = `AuraScore-${data.username}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to generate image', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="relative w-[1000px] h-screen flex items-center justify-center mx-auto"
     >
-      <div className="relative w-[1000px] h-[560px]">
+      <div className="relative w-[1000px] h-[560px]" ref={cardRef}>
         {/* Central Hub */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex items-center justify-center">
           <div className="relative w-[251px] h-[251px] rounded-full overflow-hidden shadow-[0_0_21px_10px_rgba(217,217,217,0.6)]">
@@ -333,13 +364,26 @@ const ResultScreen: FC<{
           <div className="card-shape w-full h-full scale-y-[-1]"></div>
           <div className="absolute inset-0 pl-38 pr-4 py-10 flex flex-row flex-wrap content-center items-center justify-center gap-3">
             {data.niches.map((label, i) => (
-              <div key={i} className="bg-bg text-off-white px-5 py-2 rounded-xl text-[26px] font-condensed font-bold leading-none tracking-tight hover:scale-110 hover:shadow-lg transition-all cursor-default shadow-sm border border-off-white/10 hover:border-red">
+              <div key={i} className="bg-bg text-off-white px-5 py-2 rounded-xl text-[26px] font-condensed font-bold leading-none tracking-tight shadow-sm border border-off-white/10">
                 {label}
               </div>
             ))}
           </div>
         </motion.div>
       </div>
+
+      {/* Floating Download Button */}
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1 }}
+        onClick={handleDownload}
+        className="exclude-from-capture absolute bottom-[-80px] left-1/2 -translate-x-1/2 flex items-center gap-3 bg-red text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        style={{ filter: `hue-rotate(${hueRotation}deg)` }}
+      >
+        <Download size={24} strokeWidth={3} />
+        {isDownloading ? 'Saving...' : 'Save Image'}
+      </motion.button>
       
     </motion.div>
   );
@@ -469,7 +513,7 @@ export default function App() {
             <LoadingScreen key="loading" />
           )}
           {screen === "result" && (
-            <ResultScreen key="result" data={analysisData} trends={trends} />
+            <ResultScreen key="result" data={analysisData} trends={trends} hueRotation={hueRotation} />
           )}
         </AnimatePresence>
       </div>
