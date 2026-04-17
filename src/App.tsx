@@ -94,21 +94,19 @@ const Bar: FC<{ width: string; label: string; index: number }> = ({ width, label
       onMouseMove={handleMouseMove}
       onClick={handleClick}
       onMouseLeave={() => setShowIndicator(false)}
-      className="group relative cursor-pointer"
+      className="group relative cursor-pointer mb-1"
     >
-      <div className="w-full h-6 bg-off-white rounded-full overflow-hidden">
+      <div className="flex justify-between items-center mb-1 pr-2">
+        <span className="text-xl font-condensed font-bold text-bg uppercase tracking-wide">{label}</span>
+        <span className="text-xl font-condensed font-bold text-bg opacity-70">{Math.round(parseFloat(width))}%</span>
+      </div>
+      <div className="w-full h-4 bg-off-white rounded-full overflow-hidden border border-bg/10 shadow-inner">
         <motion.div 
           initial={{ width: 0 }}
-          animate={{ width }}
-          transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-          className="h-full bg-bg rounded-full group-hover:opacity-80 transition-opacity"
+          animate={{ width: `${width}%` }}
+          transition={{ duration: 1.2, delay: 0.5 + index * 0.1, ease: "circOut" }}
+          className="h-full bg-bg rounded-full group-hover:opacity-90 transition-opacity"
         />
-      </div>
-      <div 
-        style={{ left: `${mousePos}%` }}
-        className={`absolute -top-12 -translate-x-1/2 bg-bg text-off-white px-4 py-1.5 rounded-lg text-xl font-condensed transition-opacity pointer-events-none whitespace-nowrap z-40 shadow-xl ${showIndicator ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-      >
-        {label}
       </div>
     </div>
   );
@@ -372,10 +370,11 @@ const ResultScreen: FC<{
           className="absolute top-0 right-0 w-[480px] h-[260px] overflow-hidden"
         >
           <div className="card-shape w-full h-full"></div>
-          <div className="absolute inset-0 pl-42 pr-8 flex items-center justify-center">
-            <span className="inline-block text-[184px] font-condensed font-medium text-bg leading-none tracking-tighter scale-y-110">
+          <div className="absolute inset-0 pl-44 pr-8 flex items-center justify-center gap-1">
+            <span className="inline-block text-[184px] font-condensed font-bold text-bg leading-none tracking-tighter scale-y-110">
               <AnimatedNumber value={data.card2_score} format={(v) => Math.round(v).toString()} />
             </span>
+            <span className="text-5xl font-condensed font-bold text-bg/40 mt-16">/100</span>
           </div>
         </motion.div>
 
@@ -387,14 +386,14 @@ const ResultScreen: FC<{
           className="absolute bottom-0 left-0 w-[480px] h-[260px] overflow-hidden"
         >
           <div className="card-shape w-full h-full scale-x-[-1] scale-y-[-1]"></div>
-          <div className="absolute inset-0 pl-8 pr-42 flex flex-col justify-center gap-6">
+          <div className="absolute inset-0 pl-8 pr-44 flex flex-col justify-center gap-3">
             {[
               { val: data.breakdown.authenticity, label: "Authenticity" },
               { val: data.breakdown.value, label: "Value" },
               { val: data.breakdown.influence, label: "Influence" },
               { val: data.breakdown.activity, label: "Activity" }
             ].map((bar, i) => (
-              <Bar key={i} width={`${(bar.val / 25) * 100}%`} label={bar.label} index={i} />
+              <Bar key={i} width={bar.val.toString()} label={bar.label} index={i} />
             ))}
           </div>
         </motion.div>
