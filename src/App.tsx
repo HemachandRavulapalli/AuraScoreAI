@@ -408,41 +408,42 @@ const ResultScreen: FC<{
           <div className="card-shape w-full h-full scale-y-[-1]"></div>
           <div className="absolute inset-0 pl-38 pr-4 py-10 flex flex-row flex-wrap content-center items-center justify-center gap-3">
             {data.niches.map((label, i) => (
-              <div key={i} className="bg-bg text-off-white px-5 py-2 rounded-xl text-[26px] font-condensed font-bold leading-none tracking-tight shadow-sm border border-off-white/10">
-                {label}
+              <div key={i} className="bg-bg text-off-white px-5 py-2 rounded-xl text-[26px] font-condensed font-bold leading-none tracking-tight shadow-sm border border-off-white/10 uppercase">
+                #{label.replace(/^#/, '')}
               </div>
             ))}
           </div>
         </motion.div>
       </div>
 
-      {/* Floating Action Buttons */}
+      {/* Action Bar */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 1 }}
-        className="exclude-from-capture absolute bottom-[-80px] left-1/2 -translate-x-1/2 flex items-center gap-4 z-[100]"
+        className="exclude-from-capture absolute bottom-[-100px] left-1/2 -translate-x-1/2 flex items-center gap-6 p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl z-[100]"
         style={{ filter: `hue-rotate(${hueRotation}deg)` }}
       >
         <button
           onClick={handleDownload}
-          className="flex items-center gap-3 bg-red text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-3 bg-red text-bg px-7 py-3 rounded-2xl font-condensed text-xl font-black shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer uppercase tracking-tighter"
         >
-          <Download size={24} strokeWidth={3} />
-          {isDownloading ? 'Processing...' : 'Save File'}
+          <Download size={20} strokeWidth={4} />
+          {isDownloading ? '...' : 'Save PNG'}
         </button>
         <button
           onClick={handleShare}
-          className="flex items-center gap-3 bg-off-white text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg shadow-off-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-3 bg-off-white text-bg px-7 py-3 rounded-2xl font-condensed text-xl font-black shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer uppercase tracking-tighter"
         >
-          <Share2 size={24} strokeWidth={3} />
+          <Share2 size={20} strokeWidth={4} />
           Share
         </button>
+        <div className="h-8 w-px bg-white/10 mx-1" />
         <button
           onClick={handlePostToX}
-          className="flex items-center gap-3 bg-[#1DA1F2] text-white px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-3 bg-[#1DA1F2] text-white px-7 py-3 rounded-2xl font-condensed text-xl font-black shadow-lg hover:brightness-110 active:scale-95 transition-all cursor-pointer uppercase tracking-tighter"
         >
-          <Twitter size={24} fill="currentColor" />
+          <Twitter size={20} fill="currentColor" />
           Post to X
         </button>
       </motion.div>
@@ -455,7 +456,7 @@ const ResultScreen: FC<{
 
 export default function App() {
   const [screen, setScreen] = useState<"search" | "loading" | "result">("search");
-  const [randomInitHash] = useState(() => Math.floor(Math.random() * 360));
+  const [randomInitHash] = useState(0); // Restored original Cyan/Teal brand color
   const [analysisData, setAnalysisData] = useState<TwitterScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [trends, setTrends] = useState<{
