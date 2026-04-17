@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
-import { fetchTweetsFromRapidAPI } from "./src/lib/twitterApi.js";
+import { fetchTweetsFromRapidAPI } from "./src/lib/twitterApi.ts";
 import helmet from "helmet";
 import cors from "cors";
 import { z } from "zod";
