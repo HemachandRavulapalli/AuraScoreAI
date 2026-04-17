@@ -1,7 +1,6 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import { fileURLToPath } from "url";
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import { fetchTweetsFromRapidAPI } from "./src/lib/twitterApi.js";
@@ -11,9 +10,6 @@ import { z } from "zod";
 import { LRUCache } from "lru-cache";
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Initialize Groq securely; fail gracefully later if invalid.
 let groq: Groq | null = null;
