@@ -1,7 +1,6 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import { fetchTweetsFromRapidAPI } from "./src/lib/twitterApi.ts";
 import helmet from "helmet";
@@ -11,15 +10,7 @@ import { LRUCache } from "lru-cache";
 
 dotenv.config();
 
-// Initialize Groq securely; fail gracefully later if invalid.
-let groq: Groq | null = null;
-if (process.env.GROQ_API_KEY) {
-  try {
-    groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-  } catch (e) {
-    console.warn("Groq initialization failed. LLM disabled.");
-  }
-}
+
 
 // Global LRU Cache Instance - Max 500 users, 24-Hour TTL
 const profileCache = new LRUCache<string, any>({
@@ -151,30 +142,31 @@ async function startServer() {
 
       // 7. LLM Organic Reasoning
       let niche = ["Creator", "Educator", "Analyst", "Promoter"];
-      if (groq) {
+      if (process.env.GEMINI_API_KEY) {
         try {
           const tweetTexts = tweetsToAnalyze.map(t => t.text).join("\n");
-          const completion = await groq.chat.completions.create({
-            messages: [
-              {
-                role: "system",
-                content: `You are a social media analyst. Based ONLY on the provided tweet texts, return 4 or 5 one-word labels that describe the user's niche or profile type. Return ONLY the labels separated by commas.`
-              },
-              {
-                role: "user",
-                content: `Analyze these tweets for user ${username}:\n\n${tweetTexts}`
-              }
-            ],
-            model: "llama-3.3-70b-versatile",
+          const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `You are a social media analyst. Based ONLY on the provided tweet texts, return 4 or 5 one-word labels that describe the user's niche or profile type. Return ONLY the labels separated by commas. Analyze these tweets for user ${username}:\n\n${tweetTexts}`
+                }]
+              }]
+            })
           });
-
-          const responseText = completion.choices[0]?.message?.content;
-          if (responseText) {
-            const labels = responseText.split(",").map(s => s.trim().replace(/[.]/g, "")).filter(s => s.length > 0);
-            if (labels.length >= 3) niche = labels.slice(0, 5);
+          
+          if (geminiResponse.ok) {
+            const result = await geminiResponse.json();
+            const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (responseText) {
+              const labels = responseText.split(",").map(s => s.trim().replace(/[.]/g, "")).filter(s => s.length > 0);
+              if (labels.length >= 3) niche = labels.slice(0, 5);
+            }
           }
         } catch (error) {
-          console.error("LLM Inference error:", error);
+          console.error("Gemini Inference error:", error);
         }
       }
 
