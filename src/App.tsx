@@ -250,9 +250,9 @@ const ResultScreen: FC<{
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="relative w-[1000px] h-screen flex items-center justify-center mx-auto"
+      className="relative w-[1000px] h-[560px] flex items-center justify-center mx-auto"
     >
-      <div className="relative w-[1000px] h-[560px]" ref={cardRef}>
+      <div className="absolute inset-0" ref={cardRef}>
         {/* Central Hub */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 flex items-center justify-center">
           <div className="relative w-[251px] h-[251px] rounded-full overflow-hidden shadow-[0_0_21px_10px_rgba(217,217,217,0.6)]">
