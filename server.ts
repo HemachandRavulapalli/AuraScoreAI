@@ -197,14 +197,12 @@ async function startServer() {
           average_comments: avgReplies,
           engagement_rate: engagementRate
         },
-        score: {
-          total: scoreTotal,
-          breakdown: {
-            authenticity,
-            value,
-            influence,
-            activity
-          }
+        card2_score: scoreTotal,
+        breakdown: {
+          authenticity,
+          value,
+          influence,
+          activity
         },
         niches: niche,
         from_cache: false
