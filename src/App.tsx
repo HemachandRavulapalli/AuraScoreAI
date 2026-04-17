@@ -117,9 +117,9 @@ const Bar: FC<{ width: string; label: string; index: number }> = ({ width, label
 const SearchScreen: FC<{ 
   onSearch: (username: string) => void; 
   error: string | null;
-  username: string;
-  setUsername: (val: string) => void;
-}> = ({ onSearch, error, username, setUsername }) => {
+}> = ({ onSearch, error }) => {
+  const [username, setUsername] = useState("");
+
   const handleSubmit = (e?: FormEvent) => {
     e?.preventDefault();
     if (username.trim()) {
@@ -196,7 +196,7 @@ const LoadingScreen: FC = () => (
 );
 
 import { toPng } from 'html-to-image';
-import { Download } from 'lucide-react';
+import { Download, Share2 } from 'lucide-react';
 
 const ResultScreen: FC<{ 
   data: TwitterScoreResult | null;
@@ -222,25 +222,61 @@ const ResultScreen: FC<{
     return `${rate.toFixed(2)}%`;
   };
 
+  const generateImageFile = async (): Promise<{ dataUrl: string, file: File } | null> => {
+    if (!cardRef.current) return null;
+    const dataUrl = await toPng(cardRef.current, {
+      cacheBust: true,
+      backgroundColor: '#0F172A',
+      style: { filter: `hue-rotate(${hueRotation}deg)` },
+      filter: (node) => !node.classList?.contains('exclude-from-capture')
+    });
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], `AuraScore-${data.username}.png`, { type: 'image/png' });
+    return { dataUrl, file };
+  };
+
   const handleDownload = async () => {
-    if (!cardRef.current || isDownloading) return;
+    if (isDownloading) return;
     try {
       setIsDownloading(true);
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        backgroundColor: '#0F172A',
-        style: { filter: `hue-rotate(${hueRotation}deg)` },
-        filter: (node) => {
-          // exclude the download button from the generated image
-          return !node.classList?.contains('exclude-from-capture');
-        }
-      });
+      const img = await generateImageFile();
+      if (!img) return;
       const link = document.createElement('a');
-      link.download = `AuraScore-${data.username}.png`;
-      link.href = dataUrl;
+      link.download = img.file.name;
+      link.href = img.dataUrl;
       link.click();
     } catch (err) {
       console.error('Failed to generate image', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (isDownloading) return;
+    try {
+      setIsDownloading(true);
+      const img = await generateImageFile();
+      if (!img) return;
+      
+      const shareData = {
+        title: 'My AuraScore Profile',
+        text: `Check out my genuine AuraScore intelligence dashboard for @${data.username}! #AuraScore`,
+        files: [img.file]
+      };
+
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback gracefully back to purely downloading if browser doesn't support Web Share APIs natively
+        const link = document.createElement('a');
+        link.download = img.file.name;
+        link.href = img.dataUrl;
+        link.click();
+        alert("Your device doesn't support direct social sharing. The image was saved locally to share manually!");
+      }
+    } catch (err) {
+      console.error('Failed to share image', err);
     } finally {
       setIsDownloading(false);
     }
@@ -375,18 +411,29 @@ const ResultScreen: FC<{
         </motion.div>
       </div>
 
-      {/* Floating Download Button */}
-      <motion.button
+      {/* Floating Action Buttons */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1 }}
-        onClick={handleDownload}
-        className="exclude-from-capture absolute bottom-[-80px] left-1/2 -translate-x-1/2 flex items-center gap-3 bg-red text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        className="exclude-from-capture absolute bottom-[-80px] left-1/2 -translate-x-1/2 flex items-center gap-4 z-[100]"
         style={{ filter: `hue-rotate(${hueRotation}deg)` }}
       >
-        <Download size={24} strokeWidth={3} />
-        {isDownloading ? 'Saving...' : 'Save Image'}
-      </motion.button>
+        <button
+          onClick={handleDownload}
+          className="flex items-center gap-3 bg-red text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
+          <Download size={24} strokeWidth={3} />
+          {isDownloading ? 'Processing...' : 'Save File'}
+        </button>
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-3 bg-off-white text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg shadow-off-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
+          <Share2 size={24} strokeWidth={3} />
+          Share UI
+        </button>
+      </motion.div>
       
     </motion.div>
   );
@@ -396,7 +443,7 @@ const ResultScreen: FC<{
 
 export default function App() {
   const [screen, setScreen] = useState<"search" | "loading" | "result">("search");
-  const [typedUsername, setTypedUsername] = useState("");
+  const [randomInitHash] = useState(() => Math.floor(Math.random() * 360));
   const [analysisData, setAnalysisData] = useState<TwitterScoreResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [trends, setTrends] = useState<{
@@ -479,16 +526,16 @@ export default function App() {
     }
   };
 
-  // Calculate a unique hue rotation based on the high-entropy string hash
+  // Calculate a unique hue rotation based on the high-entropy string hash map
   const getHueRotation = () => {
-    const targetString = screen === "result" ? (analysisData?.username || "") : typedUsername;
-    if (!targetString) return 0; // Default to Cyan if completely empty
-    
-    let hash = 0;
-    for (let i = 0; i < targetString.length; i++) {
-        hash = targetString.charCodeAt(i) + ((hash << 5) - hash);
+    if (screen === "result" && analysisData?.username) {
+      let hash = 0;
+      for (let i = 0; i < analysisData.username.length; i++) {
+          hash = analysisData.username.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return Math.abs(hash % 360);
     }
-    return Math.abs(hash % 360);
+    return randomInitHash;
   };
 
   const hueRotation = getHueRotation();
@@ -516,8 +563,6 @@ export default function App() {
               key="search" 
               onSearch={handleSearch} 
               error={error}
-              username={typedUsername}
-              setUsername={setTypedUsername}
             />
           )}
           {screen === "loading" && (
