@@ -196,7 +196,7 @@ const LoadingScreen: FC = () => (
 );
 
 import { toPng } from 'html-to-image';
-import { Download, Share2 } from 'lucide-react';
+import { Download, Share2, Twitter } from 'lucide-react';
 
 const ResultScreen: FC<{ 
   data: TwitterScoreResult | null;
@@ -273,13 +273,19 @@ const ResultScreen: FC<{
         link.download = img.file.name;
         link.href = img.dataUrl;
         link.click();
-        alert("Your device doesn't support direct social sharing. The image was saved locally to share manually!");
+        alert("Native sharing is not supported on this browser. The image was saved locally to share manually!");
       }
     } catch (err) {
       console.error('Failed to share image', err);
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handlePostToX = () => {
+    const text = encodeURIComponent(`Check out my genuine AuraScore intelligence dashboard for @${data.username}! Analysed by Gemini AI. #AuraScore #AI`);
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://x.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   };
 
   return (
@@ -431,7 +437,14 @@ const ResultScreen: FC<{
           className="flex items-center gap-3 bg-off-white text-bg px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg shadow-off-white/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           <Share2 size={24} strokeWidth={3} />
-          Share UI
+          Share
+        </button>
+        <button
+          onClick={handlePostToX}
+          className="flex items-center gap-3 bg-[#1DA1F2] text-white px-8 py-3 rounded-full font-condensed text-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
+          <Twitter size={24} fill="currentColor" />
+          Post to X
         </button>
       </motion.div>
       

@@ -15,9 +15,9 @@
     <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite" />
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
     <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node" />
+    <img src="https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Gemini" />
     <img src="https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
-    <img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" alt="GH Actions" />
   </p>
   
   <br />
@@ -25,12 +25,13 @@
 
 ## 📖 Overview
 
-**AuraScore AI** redefines how we visualize social engagement. Instead of flat numbers, it instantly scrapes a user's X (Twitter) profile, interpolates organic reach using the **Gemini AI SDK**, and presents a stunning, deterministic Glassmorphism dashboard uniquely colored based on the user's payload footprint.
+**AuraScore AI** is a professional-grade social intelligence dashboard that replaces legacy scraping with **Gemini Search Grounding**. It dynamically indexes real-time X (Twitter) profile data through the Google Search engine, hydrates it into a stunning Glassmorphism UI, and provides high-fidelity social sharing capabilities.
 
 ### ✨ Key Features
-- **Deterministic Color Mapping:** Unique color palettes automatically generated via string-hash matrices for every individual profile.
-- **Micro-interactions & Physics:** Powered entirely by `framer-motion` to spring-animate metric counters on a stagger.
-- **Enterprise-Ready:** Hardened with a multi-stage `Dockerfile`, strict `eslint` policies, and integrated CI/CD via GitHub Actions.
+- **Gemini Search Grounding:** Bypasses legacy scraping using Gemini's native `googleSearch` capability to live-index and extract real-time X profile statistics.
+- **Deterministic Color Identity:** Implements a high-entropy bitwise string-hash to generate unique, consistent color palettes for every user.
+- **Social Export Suite:** Integrated `html-to-image` for PNG generation, native OS Sharing (Web Share API), and a "Post to X" web intent.
+- **Enterprise-Grade Backend:** Hardened with **Zod** validation, **LRU-Caching**, **Helmet/CORS** security, and standardized error schemas.
 
 ---
 
@@ -39,54 +40,42 @@
 ```mermaid
 graph LR
     A[Client UI<br/>React + Framer] -->|Search Payload| B(Express Server Middleware)
-    B -->|Ingest Metrics| C{Upstash Redis Cache}
-    C -->|If Miss| D[RapidAPI X Scraper]
-    D -->|Sanitization| E[Google Gemini SDK]
-    E -->|Analyze Topics| B
-    B -->|Send Payload| A
+    B -->|LRU Cache Check| C{Memory Cache}
+    C -->|If Miss| D[Gemini 2.5 Flash API]
+    D -->|Google Search Grounding| E[Live Internet Data]
+    E -->|Structured JSON| D
+    D -->|Inference & Scoring| B
+    B -->|Self-Hosted Assets| F[unavatar.io]
+    F -->|Real-time Avatar| A
+    B -->|Hydrated Payload| A
 ```
 
 ---
 
 ## 🚀 Quick Start (Local)
 
-To run this application locally outside of Docker, ensure you have Node.js (`v20.x` or higher) installed.
+To run this application locally outside of Docker, ensure you have Node.js (`v22.x` or higher) installed.
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/HemachandRavulapalli/AuraScoreAI.git
 cd AuraScoreAI
 
-# 2. Install dependencies via clean install
-npm ci
+# 2. Setup your environment keys in .env
+GEMINI_API_KEY="your_api_key_here"
 
-# 3. Setup your environment keys
-cp .env.example .env
-# Edit .env with your GROQ / GEMINI keys!
-
-# 4. Start the development server
+# 3. Start the project
+npm install
 npm run dev
 ```
 
-Open `http://localhost:3000` to view the application in action.
+Open **`http://localhost:3000`** to view the application.
 
 ---
 
-## 🐳 Docker Deployment
+## 🛡️ Security & Reliability
 
-AuraScore AI uses a robust multi-stage Docker build, isolating the Vite compilation environment from the minimal Alpine runtime environment to sharply reduce container sizes.
-
-```bash
-# Spin up the container stack immediately in detached mode
-docker-compose up -d --build
-```
-The Express backend proxy and Vite static artifacts will reliably run at `http://localhost:3000`.
-
----
-
-## 🔄 CI/CD CI Pipeline
-
-This repository is strictly protected by a GitHub Actions Continuous Integration pipeline:
-- **Linting:** Validates zero TypeScript deviations.
-- **Build Verification:** Executes `vite build` cleanly to ensure the Docker matrix will successfully compile.
-- Triggered automatically on all pushes to `main` and active Pull Requests.
+This project is built for production environments:
+- **Zero-Dependency Inference:** Uses native REST calls to Gemini to minimize bundle size.
+- **Request Buffering:** Prevents API spam via in-memory caching.
+- **Deterministic UI:** Every `@username` has a unique "Aura" that is mathematically derived from their handle.
