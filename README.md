@@ -1,10 +1,9 @@
 <div align="center">
-  <img src="https://img.freepik.com/free-vector/abstract-technology-particle-background_52683-25766.jpg" alt="AuraScore Banner" width="100%" style="max-height: 300px; object-fit: cover; border-radius: 12px;"/>
-
+  
   <br />
   <br />
 
-  <h1>🔮 AuraScore AI</h1>
+  <h1> AuraScore AI</h1>
 
   <p>
     <strong>A highly dynamic, AI-powered social engagement profiler.</strong><br/>
